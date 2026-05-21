@@ -42,13 +42,11 @@ jobs:
           aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
 
       # Paso 6: Agregar llave SSH para conectarse a EC2
-      - name: Add SSH Key
-        run: |
-          set -e
-          mkdir -p ~/.ssh
-          echo "${{ secrets.EC2_SSH_KEY_FRONTEND }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          chmod 644 ~/.ssh/id_rsa.pub
+      - uses: actions/checkout@v3
+      - name: Setup SSH agent
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
           
       # Paso 7: Conectarse a EC2 y desplegar el frontend
       - name: Deploy frontend in EC2

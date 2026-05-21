@@ -26,7 +26,7 @@ jobs:
       - name: Build Docker image
         run: |
           set -e
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/despacho-frontend:latest .
+          docker build -f ./front_despacho/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/despacho-frontend:latest .
 
       # Paso 4: Subir la imagen a DockerHub
       - name: Push Docker image

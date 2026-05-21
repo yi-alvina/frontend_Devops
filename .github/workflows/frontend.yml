@@ -48,8 +48,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_KEY_FRONTEND }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          chmod 600 /home/runner/.ssh/id_rsa
-          chmod 644 /home/runner/.ssh/id_rsa.pub
+          chmod 644 ~/.ssh/id_rsa.pub
           
       # Paso 7: Conectarse a EC2 y desplegar el frontend
       - name: Deploy frontend in EC2

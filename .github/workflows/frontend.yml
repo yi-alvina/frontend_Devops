@@ -25,8 +25,8 @@ jobs:
       # Paso 3: Construir la imagen Docker del frontend
       - name: Build Docker image
         run: |
-          set -e
-          docker build -f ./front_despacho/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/despacho-frontend:latest .
+            set -e
+            docker build -f front_despacho/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/despacho-frontend:latest front_despacho/
 
       # Paso 4: Subir la imagen a DockerHub
       - name: Push Docker image

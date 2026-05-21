@@ -27,13 +27,11 @@ jobs:
         run: |
             set -e
             docker build -f front_despacho/Dockerfile -t ${{ secrets.DOCKERHUB_USERNAME }}/despacho-frontend:latest front_despacho/
-
       # Paso 4: Subir la imagen a DockerHub
       - name: Push Docker image
         run: |
           set -e
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/despacho-frontend:latest
-
       # Paso 5: Configurar credenciales AWS
       - name: Set up AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -50,7 +48,6 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_SSH_KEY_FRONTEND }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-
       # Paso 7: Conectarse a EC2 y desplegar el frontend
       - name: Deploy frontend in EC2
         run: |
@@ -58,49 +55,35 @@ jobs:
           ssh -i ~/.ssh/id_rsa \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
-            ${{ secrets.USER_SERVER }}@${{ secrets.EC2_HOST_FRONTEND }} << EOF
-
+            ${{ secrets.USER_SERVER }}@${{ secrets.EC2_HOST_FRONTEND }} << 'EOF'
             set -e
-
             echo "Validando Docker..."
             docker --version
-
             echo "Autenticando en DockerHub..."
             echo "${{ secrets.DOCKERHUB_TOKEN }}" | docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin
-
             echo "Descargando última imagen del frontend..."
             docker pull ${{ secrets.DOCKERHUB_USERNAME }}/despacho-frontend:latest
-
             echo "Deteniendo contenedor anterior..."
             docker stop despacho-frontend || true
-
             echo "Eliminando contenedor anterior..."
             docker rm despacho-frontend || true
-
             echo "Levantando nuevo contenedor..."
             docker run -d \
               --name despacho-frontend \
               --restart unless-stopped \
               -p 8080:80 \
               ${{ secrets.DOCKERHUB_USERNAME }}/despacho-frontend:latest
-
             echo "Estado del contenedor:"
             docker ps --filter "name=despacho-frontend"
-
             echo "Validando que el contenedor esté activo..."
             docker ps --format '{{.Names}}' | grep -q "despacho-frontend" || { echo "ERROR: despacho-frontend no está activo"; exit 1; }
-
             echo "Validando respuesta HTTP del frontend..."
             if ! command -v curl >/dev/null 2>&1; then
               echo "ERROR: curl no está instalado en la EC2"
               exit 1
             fi
-
             curl -f http://localhost:8080
-
             echo "Limpiando imágenes no utilizadas..."
             docker image prune -f
-
             echo "Despliegue del frontend finalizado correctamente"
-
           EOF
